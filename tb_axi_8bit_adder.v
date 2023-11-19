@@ -18,14 +18,14 @@ wire [15:0] result;
 initial
 	forever #5 clk = ~clk;
 
-axi_8bit_transmitter_sync term1 (
+axi_8bit_transmitter_sync #( 40, 0) term1 (
 	.clk(clk),
 	.m_axis_data(term1_data),
 	.m_axis_valid(term1_valid),
 	.m_axis_ready(term1_ready)
 );
 
-axi_8bit_transmitter_sync term2 (
+axi_8bit_transmitter_sync #( 40, 0) term2 (
 	.clk(clk),
 	.m_axis_data(term2_data),
 	.m_axis_valid(term2_valid),
@@ -47,7 +47,7 @@ axi_8bit_adder adder (
 	.m_axis_valid(sum_valid)
 );
 
-axi_16bit_receiver res (
+axi_16bit_receiver #( 50, 20) res (
 	.clk(clk),
 	.s_axis_data(sum_data),
 	.s_axis_valid(sum_valid),
