@@ -1,13 +1,5 @@
 `timescale 1ns / 1ns
 
-/*
-Данная реализация кода получает сначала
-первое или второе слагаемое и выставляет на
-соответсвующем выходе s_axis_ready 0 (ноль),
-после дожидается получения второго слагаемого
-и отправляет сумму на выход.
-*/
-
 module axi_8bit_adder (
 	input clk,
 
@@ -38,14 +30,20 @@ assign s_axis_ready2 = s_axis_ready2_state;
 
 always @(posedge clk)
 begin
-	if ((s_axis_valid1 == 1 & s_axis_ready1 == 1) & (s_axis_valid2 == 1 & s_axis_ready2 == 1))
+
+	if (m_axis_valid == 1 & m_axis_ready == 1)
+	begin
+		m_axis_valid <= 0;
+	end
+
+	if ((s_axis_valid1 == 1 & s_axis_ready1 == 1) & (s_axis_valid2 == 1 & s_axis_ready2 == 1) & ((m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1)))
 	begin
 		m_axis_data <= s_axis_data1 + s_axis_data2;
 		m_axis_valid <= 1;
 	end
 	else if (s_axis_valid1 == 1 & s_axis_ready1 == 1)
 	begin
-		if (is_s_axis_data2 == 1)
+		if ((is_s_axis_data2 == 1) & ((m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1)))
 		begin
 			m_axis_data <= s_axis_data1 + s_axis_data2_buf;
 			is_s_axis_data2 <= 0;
@@ -61,7 +59,7 @@ begin
 	end
 	else if (s_axis_valid2 == 1 & s_axis_ready2 == 1)
 	begin
-		if (is_s_axis_data1 == 1)
+		if ((is_s_axis_data1 == 1) & ((m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1)))
 		begin
 			m_axis_data <= s_axis_data2 + s_axis_data1_buf;
 			is_s_axis_data1 <= 0;
@@ -75,9 +73,16 @@ begin
 			s_axis_ready2_state <= 0;
 		end
 	end
-	
-	if (m_axis_valid == 1 & m_axis_ready == 1)
-		m_axis_valid <= 0;
+	else if ((is_s_axis_data1 == 1 & is_s_axis_data2 == 1) & ((m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1)))
+	begin
+		m_axis_data <= s_axis_data1_buf + s_axis_data2_buf;
+		is_s_axis_data1 <= 0;
+		s_axis_ready1_state <= 1;
+		is_s_axis_data2 <= 0;
+		s_axis_ready2_state <= 1;
+		m_axis_valid <= 1;
+	end
+
 end
 
 endmodule

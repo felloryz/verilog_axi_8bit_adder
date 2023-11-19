@@ -7,6 +7,9 @@ module axi_8bit_transmitter_sync (
 	output [7:0] m_axis_data
 );
 
+parameter 	HIGH_RANGE = 20,
+			LOW_RANGE = 0;
+
 reg [7:0] number;
 reg [7:0] latency;
 
@@ -21,8 +24,16 @@ always @(posedge clk)
 begin
 	if (m_axis_valid == 1 & m_axis_ready == 1)
 	begin
-		m_axis_valid <= 0;
-		is_latency <= 1;
+		if (HIGH_RANGE == 0 & LOW_RANGE == 0)
+		begin
+			number <= $urandom_range(8'hFF,0);
+			m_axis_valid <= 1;
+		end
+		else
+		begin
+			m_axis_valid <= 0;
+			is_latency <= 1;
+		end
 	end
 end
 
@@ -30,7 +41,7 @@ always @(*)
 begin
 	if (is_latency == 1)
 	begin
-		latency = $urandom_range(60,20);
+		latency = $urandom_range(HIGH_RANGE,LOW_RANGE);
 		#latency;
 		is_latency = 0;
 	end

@@ -8,6 +8,9 @@ module axi_16bit_receiver (
 	output reg [15:0] result = 0
 );
 
+parameter 	HIGH_RANGE = 50,
+			LOW_RANGE = 20;
+
 reg [7:0] latency;
 reg is_latency;
 
@@ -16,8 +19,13 @@ begin
 	if (s_axis_valid == 1 & s_axis_ready == 1)
 	begin
 		result <= s_axis_data;
-		s_axis_ready <= 0;
-		is_latency <= 1;
+		if (HIGH_RANGE == 0 & LOW_RANGE == 0)
+			s_axis_ready <= 1;
+		else
+		begin
+			s_axis_ready <= 0;
+			is_latency <= 1;
+		end
 	end
 end
 
@@ -25,7 +33,7 @@ always @(*)
 begin
 	if (is_latency == 1)
 	begin
-		latency = $urandom_range(50,20);
+		latency = $urandom_range(HIGH_RANGE,LOW_RANGE);
 		#latency;
 		is_latency = 0;
 	end
