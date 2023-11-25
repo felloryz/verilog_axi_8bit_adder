@@ -26,24 +26,26 @@ reg s_axis_ready1_state = 1;
 reg s_axis_ready2_state = 1;
 
 assign s_axis_ready1 = s_axis_ready1_state;
-assign s_axis_ready2 = s_axis_ready2_state; 
+assign s_axis_ready2 = s_axis_ready2_state;
+
+wire m_axis_data_ready_to_receive = (m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1);
 
 always @(posedge clk)
 begin
 
-	if (m_axis_valid == 1 & m_axis_ready == 1)
+	if (m_axis_valid & m_axis_ready)
 	begin
 		m_axis_valid <= 0;
 	end
 
-	if ((s_axis_valid1 == 1 & s_axis_ready1 == 1) & (s_axis_valid2 == 1 & s_axis_ready2 == 1) & ((m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1)))
+	if ((s_axis_valid1 & s_axis_ready1) & (s_axis_valid2 & s_axis_ready2) & m_axis_data_ready_to_receive)
 	begin
 		m_axis_data <= s_axis_data1 + s_axis_data2;
 		m_axis_valid <= 1;
 	end
-	else if (s_axis_valid1 == 1 & s_axis_ready1 == 1)
+	else if (s_axis_valid1 & s_axis_ready1)
 	begin
-		if ((is_s_axis_data2 == 1) & ((m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1)))
+		if ((is_s_axis_data2) & m_axis_data_ready_to_receive)
 		begin
 			m_axis_data <= s_axis_data1 + s_axis_data2_buf;
 			is_s_axis_data2 <= 0;
@@ -57,9 +59,9 @@ begin
 			s_axis_ready1_state <= 0;
 		end
 	end
-	else if (s_axis_valid2 == 1 & s_axis_ready2 == 1)
+	else if (s_axis_valid2 & s_axis_ready2)
 	begin
-		if ((is_s_axis_data1 == 1) & ((m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1)))
+		if ((is_s_axis_data1) & m_axis_data_ready_to_receive)
 		begin
 			m_axis_data <= s_axis_data2 + s_axis_data1_buf;
 			is_s_axis_data1 <= 0;
@@ -73,7 +75,7 @@ begin
 			s_axis_ready2_state <= 0;
 		end
 	end
-	else if ((is_s_axis_data1 == 1 & is_s_axis_data2 == 1) & ((m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1)))
+	else if ((is_s_axis_data1 & is_s_axis_data2) & m_axis_data_ready_to_receive)
 	begin
 		m_axis_data <= s_axis_data1_buf + s_axis_data2_buf;
 		is_s_axis_data1 <= 0;
