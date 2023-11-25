@@ -22,9 +22,9 @@ initial
 
 always @(posedge clk)
 begin
-	if (m_axis_valid == 1 & m_axis_ready == 1)
+	if (m_axis_valid & m_axis_ready)
 	begin
-		if (HIGH_RANGE == 0 & LOW_RANGE == 0)
+		if (!HIGH_RANGE & !LOW_RANGE)
 		begin
 			number <= $urandom_range(8'hFF,0);
 			m_axis_valid <= 1;
@@ -39,7 +39,7 @@ end
 
 always @(*)
 begin
-	if (is_latency == 1)
+	if (is_latency)
 	begin
 		latency = $urandom_range(HIGH_RANGE,LOW_RANGE);
 		#latency;
@@ -49,7 +49,7 @@ end
 
 always @(posedge clk)
 begin
-	if (is_latency == 0 & m_axis_valid == 0)
+	if (!is_latency & !m_axis_valid)
 	begin
 		number <= $urandom_range(8'hFF,0);
 		m_axis_valid <= 1;

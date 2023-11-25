@@ -28,7 +28,7 @@ reg s_axis_ready2_state = 1;
 assign s_axis_ready1 = s_axis_ready1_state;
 assign s_axis_ready2 = s_axis_ready2_state;
 
-wire m_axis_data_ready_to_receive = (m_axis_valid == 0) | (m_axis_valid == 1 & m_axis_ready == 1);
+wire m_axis_data_ready_to_receive = !m_axis_valid | (m_axis_valid & m_axis_ready);
 
 always @(posedge clk)
 begin

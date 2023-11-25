@@ -16,10 +16,10 @@ reg is_latency;
 
 always @(posedge clk)
 begin
-	if (s_axis_valid == 1 & s_axis_ready == 1)
+	if (s_axis_valid & s_axis_ready)
 	begin
 		result <= s_axis_data;
-		if (HIGH_RANGE == 0 & LOW_RANGE == 0)
+		if (!HIGH_RANGE & !LOW_RANGE)
 			s_axis_ready <= 1;
 		else
 		begin
@@ -31,7 +31,7 @@ end
 
 always @(*)
 begin
-	if (is_latency == 1)
+	if (is_latency)
 	begin
 		latency = $urandom_range(HIGH_RANGE,LOW_RANGE);
 		#latency;
@@ -41,7 +41,7 @@ end
 
 always @(posedge clk)
 begin
-	if (is_latency == 0 & s_axis_ready == 0)
+	if (!is_latency & !s_axis_ready)
 		s_axis_ready <= 1;
 end
 
